@@ -35,6 +35,19 @@
 
 - (void)override_didMoveToWindow
 {
+    if (self.class != [UIView class]) {
+        Method currentMethod = class_getInstanceMethod(self.class, @selector(override_didMoveToWindow));
+        Method expectedMethod = class_getInstanceMethod([UIView class], @selector(override_didMoveToWindow));
+        if (currentMethod && expectedMethod) {
+            /// Both subclass and UIView override method override_didMoveToWindow,
+            /// In this case, just invoke method of UIView(original implementation of `didMoveToWindow`).
+            if (currentMethod != expectedMethod) {
+                ((void (*)(id, Method))method_invoke)(self, expectedMethod);
+                return;
+            }
+        }
+    }
+    
     if (!self.isNUIApplied) {
         [self applyNUI];
     }
